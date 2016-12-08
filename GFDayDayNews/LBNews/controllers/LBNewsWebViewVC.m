@@ -10,6 +10,7 @@
 #import "LBNewsWebViewVC.h"
 #import "LBWebMsgModel.h"
 #import "LBwebImgModel.h"
+#import <JavaScriptCore/JavaScriptCore.h>
 @interface LBNewsWebViewVC ()
 @property(nonatomic,assign)int fontSize;
 
@@ -75,7 +76,7 @@
             width = maxWidth;
         }
         NSString *onload = @"this.onclick = function() {\
-        window.location.href = 'sx:src=' +this.src;\
+        lbImageClick(this.src);\
         };";
         [imgHtml appendFormat:@"<img class=\"imgs\" onload=\"%@\" width=\"95%%\" height=\"auto\" src=\"%@\">",onload,imgModel.src];
         [imgHtml appendString:@"</div>"];
@@ -84,6 +85,7 @@
     }
     return body;
 }
+
 
 #pragma mark - 拦截链接
 
@@ -119,7 +121,7 @@
     }else {
         DLog(@"保存成功");
     }
-
+  
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
@@ -127,6 +129,26 @@
     NSArray *buttonItem = @[rightSharBt];
     self.navigationItem.rightBarButtonItems = buttonItem;
     [super webViewDidFinishLoad:webView];
+    JSContext *context = [webView  valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+    context[@"lbImageClick"] = ^(NSString *src) {
+        
+        [self savePictureToAlbum:src];
+        
+    };
+//    NSString *jsGetImages = @"function getImages(){\
+//    var objs = document.getElementsByTagName(\"img\"); \
+//    for(var i = 0 ; i <objs.length; i++){\
+//    objs[i].onclick = function(){\
+//    \
+//    }\
+//    }\
+//    return objs.length;\
+//    }";
+//    
+//     [webView stringByEvaluatingJavaScriptFromString:jsGetImages];
+//    NSString *length = [webView stringByEvaluatingJavaScriptFromString:@"getImages()"];
+//    DLog(@"%@",length);
+    
 }
 
 @end

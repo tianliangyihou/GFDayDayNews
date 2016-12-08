@@ -76,6 +76,8 @@
         cell.textLabel.text = @"下载进度";
     }else if (indexPath.row == 1){
         cell.textLabel.text = @"登陆后聊天";
+    }else if (indexPath.row == 2) {
+        cell.textLabel.text = @"退出";
     }else {
         cell.textLabel.text = @"测试";
     }
@@ -94,6 +96,13 @@
     if (indexPath.row == 1) {
         LBLoginViewController *login = [[LBLoginViewController alloc]init];
         [self.navigationController pushViewController:login animated:YES];
+    }
+    
+    if (indexPath.row == 2) {
+        EMError *error = [[EMClient sharedClient] logout:YES];
+        if (!error) {
+            DLog(@"退出成功");
+        }
     }
     
     if (indexPath.row != 0 ) return;

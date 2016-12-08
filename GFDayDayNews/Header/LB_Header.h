@@ -22,6 +22,9 @@
 #define  NAVBAR_HEIGHT 64
 #define  TABBAR_HEIGHT 49
 
+#define USER_NAME @"name"
+#define USER_PWD @"pwd"
+
 #define  SCREEN_WIDTH  [UIScreen mainScreen].bounds.size.width
 #define  SCREEN_HEIGHT  [UIScreen mainScreen].bounds.size.height
 
@@ -37,4 +40,7 @@
 #import "MBProgressHUD.h"
 #import "MBProgressHUD+Add.h"
 #import <DKNightVersion/DKNightVersion.h>
+
+
+
 #endif /* LB_Header_h */

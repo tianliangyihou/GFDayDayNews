@@ -11,7 +11,7 @@
 #import "LBEaseMessageViewController.h"
 
 #define   userDefaults    [NSUserDefaults standardUserDefaults]
-@interface LBLoginViewController ()<EMContactManagerDelegate>
+@interface LBLoginViewController ()
 
 @property (weak, nonatomic) IBOutlet UITextField *nameTf;
 @property (weak, nonatomic) IBOutlet UITextField *pwdTf;
@@ -23,10 +23,17 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    _nameTf.text = [userDefaults objectForKey:@"name"];
-    _pwdTf.text = [userDefaults objectForKey:@"pwd"];
-        [[EMClient sharedClient].contactManager addDelegate:self delegateQueue:nil];}
-
+    _nameTf.text = [userDefaults objectForKey:USER_NAME];
+    _pwdTf.text = [userDefaults objectForKey:USER_PWD];
+    if ([EMClient sharedClient].isLoggedIn) {
+        EMError *error = nil;
+        NSArray *userlist = [[EMClient sharedClient].contactManager getContactsFromServerWithError:&error];
+        if (!error) {
+            LBEaseMessageViewController *chatController = [[LBEaseMessageViewController alloc] initWithConversationChatter:userlist.firstObject conversationType:EMConversationTypeChat];
+            [self.navigationController pushViewController:chatController animated:YES];
+        }
+    }
+}
 
 - (IBAction)loginBtnClick:(id)sender {
     if (_nameTf.text.length == 0 || _pwdTf.text.length == 0) {
@@ -39,16 +46,18 @@
                                     completion:^(NSString *aUsername, EMError *aError) {
                                         if (!aError) {
                                             DLog(@"登陆成功");
-                                            LBEaseMessageViewController *chatController = [[LBEaseMessageViewController alloc] initWithConversationChatter:@"123" conversationType:EMConversationTypeChat];
-                                            [weakSelf.navigationController pushViewController:chatController animated:YES];
-
+                                            [userDefaults setObject:weakSelf.nameTf.text forKey:USER_NAME];
+                                            [userDefaults setObject:weakSelf.pwdTf.text  forKey:USER_PWD];
+                                            [userDefaults synchronize];
+                                            [[EMClient sharedClient].options setIsAutoLogin:YES];
                                         } else {
                                             DLog(@"登陆失败");
                                         }
                                     }];
-    
 
 }
+
+
 - (IBAction)resginBtnClick:(id)sender {
     if (_nameTf.text.length == 0 || _pwdTf.text.length == 0) {
         [MBProgressHUD showError:@"注册信息不能为空" toView:nil];
@@ -58,22 +67,14 @@
     [[EMClient sharedClient]registerWithUsername:_nameTf.text password:_pwdTf.text completion:^(NSString *aUsername, EMError *aError) {
         DLog(@"%@-----%@",aUsername,aError);
         if (aError == nil) {
-            [userDefaults setObject:weakSelf.nameTf.text forKey:@"name"];
-            [userDefaults setObject:weakSelf.pwdTf.text  forKey:@"pwd"];
+            [userDefaults setObject:weakSelf.nameTf.text forKey:USER_NAME];
+            [userDefaults setObject:weakSelf.pwdTf.text  forKey:USER_PWD];
             [userDefaults synchronize];
              [weakSelf loginBtnClick:nil];
         }
     }];
 }
-#pragma mark - 好友的申请-
-- (void)didReceiveFriendInvitationFromUsername:(NSString *)aUsername
-                                       message:(NSString *)aMessage {
 
 
-}
 
-- (void)dealloc {
-    [[EMClient sharedClient].contactManager removeDelegate:self];
-
-}
 @end
